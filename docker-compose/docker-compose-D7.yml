@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  drupal:
+    image: drupal-w-mysql-cli
+    container_name: drupal.app
+    ports: 
+      - "80:80"
+    volumes:
+      - /Users/thevinh/www/drupal_docker/sites:/var/www/html/sites
+      - /Users/thevinh/Library/Logs/web_temp/tmp:/tmp
+      - /usr/local/bin/drush:/drush/drush
+    links:
+      - db
+  db:
+    image: mariadb:5
+    container_name: drupal.db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: mkd
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: drupal754
+    volumes:
+      - /Users/thevinh/db_data/mariadb:/var/lib/mysql
