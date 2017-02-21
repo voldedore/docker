@@ -1,0 +1,20 @@
+nginx:
+  image: nginx
+  ports:
+    - "80:80"
+  volumes:
+    - /home/vtvinh/log/nginx:/var/log/nginx
+    - /home/vtvinh/www:/home/http
+    - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+  links:
+    - php
+php:
+  image: php:5-fpm
+  volumes:
+    - /home/vtvinh/www:/home/http
+  links:
+    - db
+db:
+  image: mariadb
+  environment:
+    DB_ADMIN_PASS: pass

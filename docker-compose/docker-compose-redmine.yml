@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  db:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: redmine
+    restart: always
+
+  redmine:
+    image: redmine
+    volumes:
+      - /home/vtvinh/docker_things/redmine:/redmine
+
+    ports:
+      - 8080:3000
+    environment:
+      REDMINE_DB_MYSQL: db
+      REDMINE_DB_PASSWORD: password
+      RAILS_ENV: production
+      REDMINE_LANG: en
+    depends_on:
+      - db
+    #command: sh /redmine/install-redmine-db.sh
+    restart: always
+
