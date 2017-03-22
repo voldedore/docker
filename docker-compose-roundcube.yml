@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  
+  roundcube:
+    image: robbertkl/roundcube
+    container_name: roundcube
+    ports:
+      - 88:80
+    volumes:
+      - rcdata:/var/www/db
+    environment:
+      ROUNDCUBE_DEFAULT_HOST: "ssl://mail.hostname.vn:993"
+      ROUNDCUBE_SMTP_SERVER: "tls://mail.hostname.vn:587"
+      ROUNDCUBE_IDENTITIES_LEVEL: 3
+      #ROUNDCUBE_PASSWORD_DRIVER: sasl
+      #ROUNDCUBE_USER_FILE: ""
+
+volumes:
+  rcdata:
+    driver: local

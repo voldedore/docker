@@ -11,3 +11,6 @@ Build an image based on drupal7
 Run it
 
 `$docker-compose up -d`
+
+
+Rainloop and RoundCube are used with (tomav repo)[https://github.com/tomav/docker-mailserver]

@@ -8,7 +8,6 @@ services:
       - "80:80"
     volumes:
       - /Users/thevinh/www/drupal_docker/sites:/var/www/html/sites
-      - /Users/thevinh/Library/Logs/web_temp/tmp:/tmp
       - /Users/thevinh/Library/Logs/drupal.app_log:/var/log
       - /Users/thevinh/bin/drush:/drush/drush
     links:

@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  rainloop:
+      container_name: rainloop
+      image: jprjr/rainloop
+      environment:
+        NGINX: 1
+      ports:
+        - 8080:80
+      volumes:
+        - rldata:/var/lib/rainloop/data"
+
+volumes:
+  rldata:
+    driver: local
