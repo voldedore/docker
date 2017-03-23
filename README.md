@@ -13,4 +13,4 @@ Run it
 `$docker-compose up -d`
 
 
-Rainloop and RoundCube are used with (tomav repo)[https://github.com/tomav/docker-mailserver]
+Rainloop and RoundCube are used with [tomav repo](https://github.com/tomav/docker-mailserver)
