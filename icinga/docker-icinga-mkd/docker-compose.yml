@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+  icinga:
+    #image: icinga_custom
+    privileged: true
+    build: 
+      context: ./images/icinga
+      args:
+        - ICINGA2_FEATURE_GRAPHITE=1
+        - ICINGA2_FEATURE_GRAPHITE_HOST=192.168.1.139
+        - ICINGA2_FEATURE_GRAPHITE_PORT=2003
+        - ICINGA2_FEATURE_GRAPHITE_WEB_PORT=8010
+    container_name: testicinga
+    ports:
+      - "8888:80"
+    #    restart: always      
+    volumes:      
+      #- /etc/localtime:/etc/localtime:ro
+      - ./reload:/reload
+      - ./etc/ssmtp/ssmtp.conf:/etc/ssmtp/ssmtp.conf
+      - ./usr/share/mrtg:/usr/share/mrtg
+      - ./var/www/html/mrtg:/var/www/html/mrtg
+      - ./etc/icinga2:/etc/icinga2
+      #- ./db:/var/lib/mysql
+      # - ./data_test/etc/icinga2:/etc/icinga2
+      #- ./data:/icinga2_conf
+    environment:
+      #- "TZ=Asia/Ho_Chi_Minh"
+      - "ICINGA2_FEATURE_GRAPHITE=1"
+      - "ICINGA2_FEATURE_GRAPHITE_HOST=192.168.1.139"
+      - "ICINGA2_FEATURE_GRAPHITE_PORT=2003"
+      - "ICINGA2_FEATURE_GRAPHITE_WEB_PORT=8010"
+  graphite:
+    image: hopsoft/graphite-statsd
+    container_name: graphite
+    ports:
+      - "8010:80"
+      - "2003:2003"
+      - "2004:2004"
+      - "2023:2023"
+      - "2024:2024"
+      - "8125:8125/udp"
+      - "8126:8126"
+    restart: always
+    volumes:
+      - ./graphite/configs:/opt/graphite/conf
+      - ./graphite/data:/opt/graphite/storage
+      - ./statsd/configs:/opt/statsd
+      - /etc/localtime:/etc/localtime:ro
+      - ./graphite/webapp/configs/local_settings.py:/opt/graphite/webapp/graphite/local_settings.py
+    environment:
+      - "TZ=Asia/Ho_Chi_Minh"

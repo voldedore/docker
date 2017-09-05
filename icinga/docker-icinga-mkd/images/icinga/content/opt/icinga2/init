@@ -1,0 +1,91 @@
+#!/bin/bash
+
+set -e
+
+function echo_log {
+	DATE='date +%Y/%m/%d:%H:%M:%S'
+	echo `$DATE`" $1"
+}
+
+mysql_install_db --user=mysql --ldata=/var/lib/mysql 2>&1 >/dev/null
+/usr/bin/mysqld_safe 2>&1 >/dev/null &
+sleep 10s
+mysql -uroot -e "CREATE DATABASE IF NOT EXISTS icinga ; GRANT ALL ON icinga.* TO icinga@localhost IDENTIFIED BY 'icinga';"
+mysql -uicinga -picinga icinga < /usr/share/icinga2-ido-mysql/schema/mysql.sql
+mysql -uroot -e "CREATE DATABASE IF NOT EXISTS icingaweb2 ; GRANT ALL ON icingaweb2.* TO icingaweb2@localhost IDENTIFIED BY 'icingaweb2';"
+mysql -uicingaweb2 -picingaweb2 icingaweb2 < /usr/share/doc/icingaweb2/schema/mysql.schema.sql
+mysql -uicingaweb2 -picingaweb2 icingaweb2 -e "INSERT INTO icingaweb_user (name, active, password_hash) VALUES ('icingaadmin', 1, '\$1\$iQSrnmO9\$T3NVTu0zBkfuim4lWNRmH.');"
+killall mysqld
+sleep 1s
+
+
+echo_log "Enabling icinga2 features."
+# enable icinga2 features if not already there 
+icinga2 feature enable ido-mysql command
+
+echo_log "Enabling icingaweb2 modules."
+if [[ -L /etc/icingaweb2/enabledModules/monitoring ]]; then echo "Symlink for /etc/icingaweb2/enabledModules/monitoring exists already...skipping"; else ln -s /usr/share/icingaweb2/modules/monitoring /etc/icingaweb2/enabledModules/monitoring; fi
+if [[ -L /etc/icingaweb2/enabledModules/doc ]]; then echo "Symlink for /etc/icingaweb2/enabledModules/doc exists already...skipping"; else ln -s /usr/share/icingaweb2/modules/doc /etc/icingaweb2/enabledModules/doc; fi
+
+if [[ -n "$ICINGA2_FEATURE_GRAPHITE" ]]; then
+  echo_log "Enabling Icinga 2 Graphite feature."
+  icinga2 feature enable graphite
+  if [[ -L /etc/icingaweb2/enabledModules/graphite ]]; then echo "Symlink for /etc/icingaweb2/enabledModules/graphite exists already...skipping"; else ln -s /usr/share/icingaweb2/modules/graphite /etc/icingaweb2/enabledModules/graphite; fi
+
+cat <<EOF > /etc/icinga2/features-available/graphite.conf
+/**
+ * The GraphiteWriter type writes check result metrics and
+ * performance data to a graphite tcp socket.
+ */
+
+library "perfdata"
+
+object GraphiteWriter "graphite" {
+  host = "$ICINGA2_FEATURE_GRAPHITE_HOST"
+  port = "$ICINGA2_FEATURE_GRAPHITE_PORT"
+}
+EOF
+ # ln -s /etc/icinga2/features-available/graphite.conf /etc/icinga2/features-enabled/graphite.conf
+
+  mkdir -p /etc/icingaweb2/modules/graphite
+
+cat <<EOF > /etc/icingaweb2/modules/graphite/config.ini
+[graphite]
+base_url = http://$ICINGA2_FEATURE_GRAPHITE_HOST:$ICINGA2_FEATURE_GRAPHITE_WEB_PORT/render?
+
+; fetch remote image and inline the data
+remote_fetch = false
+; verify remote certificate
+remote_verify_peer = false
+; verify remote peer name
+remote_verify_peer_name = false
+
+legacy_mode = false
+
+; if legacy mode is false (2.4 and newer):
+service_name_template = "icinga2.\$host.name\$.services.\$service.name\$.\$service.check_command\$.perfdata.\$metric\$.value"
+host_name_template = "icinga2.\$host.name\$.host.\$host.check_command\$.perfdata.\$metric\$.value"
+
+graphite_args_template = "&target=\$target\$&source=0&width=300&height=120&hideAxes=false&lineWidth=2&hideLegend=true&colorList=049BAF&areaMode=\$areaMode\$&areaAlpha=\$areaAlpha\$&bgcolor=white&fgcolor=333333&lineMode=connected&tz=Asia%2FHo_Chi_Minh"
+;this template is used for the large image, macros \$target\$ , \$areaMode\$ and \$areaAlpha\$ can used.
+graphite_large_args_template = "&target=alias(color(\$target\$_warn,'yellow'),'warning')&target=alias(color(\$target\$_crit,'red'),'critical')&target=\$target\$&source=0&width=800&height=700&colorList=\$colorList\$&lineMode=connected&areaMode=\$areaMode\$&areaAlpha=\$areaAlpha\$&bgcolor=white&fgcolor=333333"
+graphite_iframe_w = 800px
+graphite_iframe_h = 700px
+graphite_area_mode = all
+graphite_area_alpha = 0.1
+graphite_summarize_interval = 10min
+graphite_color_list = 049BAF,EE1D00,04B06E,0446B0,871E10,CB315D,B06904,B0049C
+EOF
+
+  chown -R apache:icingaweb2 /etc/icingaweb2/modules/graphite
+
+fi
+
+echo_log "Configuring httpd conf for mrtg."
+cat <<EOF > /etc/httpd/conf.d/mrtg.conf
+Alias /mrtg /var/www/html/mrtg
+
+<Location /mrtg>
+
+</Location>
+EOF

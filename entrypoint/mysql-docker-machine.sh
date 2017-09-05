@@ -8,6 +8,9 @@ usermod -o -u $TARGET_UID mysql || true
 TARGET_GID=$(stat -c "%g" /var/lib/mysql)
 echo '-- Setting mysql group to use gid '$TARGET_GID
 groupmod -o -g $TARGET_GID mysql || true
+
+mysql_install_db --user=mysql --basedir=/usr/ --ldata=/var/lib/mysql/
+
 echo
 echo '* Starting MySQL'
 chown -R mysql:root /var/run/mysqld/

@@ -1,0 +1,2 @@
+*/5 * * * * root env LANG=C /usr/bin/mrtg /usr/share/mrtg/mrtg.cfg
+# An empty line is required at the end of this file for a valid cron file.

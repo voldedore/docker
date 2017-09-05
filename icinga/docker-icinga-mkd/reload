@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "Restarting Icinga2 service..."
+#yes | cp -rf /icinga2_conf/etc/icinga2/conf.d/* /etc/icinga2/conf.d/
+if ! icinga2 daemon -C; then
+	echo "Icinga 2 config validation failed. Please recheck your configuration.\n"
+	exit 1
+fi
+pkill -HUP icinga

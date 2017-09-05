@@ -7,8 +7,8 @@ services:
     ports: 
       - "80:80"
     volumes:
-      - /Users/thevinh/www/drupal_docker/sites:/var/www/html/sites
-      - /Users/thevinh/Library/Logs/drupal.app_log:/var/log
+      - ./var/www/html/sites:/var/www/html/sites
+      # - /Users/thevinh/Library/Logs/drupal.app_log:/var/log
       - /Users/thevinh/bin/drush:/drush/drush
     links:
       - db
@@ -23,6 +23,6 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: drupal754
     volumes:
-      - /Users/thevinh/db_data/mariadb:/var/lib/mysql
+      - /Users/thevinh/db_data/mariadb040417:/var/lib/mysql
       - /Users/thevinh/docker_things/entrypoint/mysql-docker-machine.sh:/mysql-docker-machine.sh:rw
     entrypoint: /mysql-docker-machine.sh

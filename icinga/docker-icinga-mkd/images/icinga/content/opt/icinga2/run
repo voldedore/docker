@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -e
+
+function echo_log {
+	DATE='date +%Y/%m/%d:%H:%M:%S'
+	echo `$DATE`" $1"
+}
+
+
+echo_log "Changing /etc/icinga2 dir permission to 744"
+#chmod -R 744 /etc/icinga2
+
+echo_log "Changing /etc/icinga2 dir owner to icinga:root"
+#chown -R icinga:root /etc/icinga2
+
+echo_log "Validating the icinga2 configuration first."
+if ! icinga2 daemon -C; then
+	echo_log "Icinga 2 config validation failed. Stopping the container."
+	exit 1
+fi
+
+# Create /var/log/httpd if !exists
+if [ ! -d /var/log/httpd ];  then
+	mkdir -p /var/log/httpd
+fi
+
+# Reload setting from host machine
+#sleep 10
+#echo_log "Reloading setting from host machine..."
+#/reload
+# This doesn't work currently
+
+echo_log "Starting Supervisor. CTRL-C will stop the container."
+/usr/bin/supervisord -c /etc/supervisord.conf >> /dev/null
