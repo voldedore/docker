@@ -7,8 +7,8 @@ services:
       dockerfile: img_built/Dockerfile_nodejs_quasar
     container_name: quasar
     ports:
-      - "80:80"
+      - "80:8080"
     volumes:
-      - data:/var/quasar
-volumes:
-  data:
+      - /Users/thevinh/Projects/quasar:/opt/app
+    working_dir: "/opt/app"
+    # command: "npm run dev"
