@@ -1,3 +1,7 @@
 [submodule "magento2"]
 	path = magento2
 	url = git@github.com:voldedore/docker-magento2.git
+[submodule "elasticsearch"]
+	path = elasticsearch
+	url = https://github.com/voldedore/docker-mage-es.git
+
