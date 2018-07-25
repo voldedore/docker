@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    restart: always
+    volumes:
+      - /home/mkd/docker-prometheus/data/prometheus:/prometheus
+      - /home/mkd/docker-prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    restart: always
+    ports:
+      - "9100:9100"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - /home/mkd/docker-prometheus/data/grafana:/var/lib/grafana
